@@ -1,0 +1,68 @@
+# conf/experiment/sciqa.yaml
+
+tag: "sci"
+corpus: "sci"
+
+
+
+corpus_dataset_name: "hicai-zju/SciKnowEval"
+corpus_dataset_config: null
+corpus_split: "test"
+
+
+
+test_dataset_name: "hicai-zju/SciKnowEval"
+test_dataset_config: null
+test_split: "test"
+
+visualize_memory: True
+
+
+field_map:
+  question: "question"
+  answer: "answer"
+
+total_limit: 4000
+
+
+target_domain: "Physics"
+
+retrieval_method: "bm25"
+
+
+
+
+prompts:
+
+
+  sys_msg : |
+    You are a scientific domain expert.
+    The user will provide a question with options (e.g., A, B, C, D).
+    Analyze the question and select the correct option.
+
+    IMPORTANT:
+    - Output ONLY the option letter enclosed in \boxed{{}}.
+    - For example: \boxed{{A}} or \boxed{{B}}.
+    - Do NOT output "Yes", "No", "True", or "False". Only the letter.
+  rag_system: |
+        You are a scientific expert. Below are some similar solved problems (references).
+        Refer to the logic in these examples to solve the new question.
+
+        ### Instructions:
+        1. Read the question and the provided options carefully.
+        2. If it looks like a True/False question, treat "True" as Option A and "False" as Option B.
+        3. Think step by step to derive the correct answer.
+        4. Your final output MUST be the option letter enclosed in \boxed{{}}.
+
+        ### Format Example:
+        If the answer is Option A, output: \boxed{{A}}
+
+        {reference}
+
+        ### New Question:
+        {question}
+
+        ### Answer:
+        Let's think step by step.
+
+

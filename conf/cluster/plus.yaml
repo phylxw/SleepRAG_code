@@ -1,0 +1,38 @@
+
+method: "agglomerative"                
+
+
+hdbscan_min_cluster_size: 5      
+hdbscan_min_samples: null        
+hdbscan_metric: "euclidean"      
+hdbscan_selection_method: "eom"  
+
+
+vis_method: "umap"               
+
+
+umap_supervised: true            
+umap_target_weight: 0.5          
+umap_n_neighbors: 15             
+umap_min_dist: 0.1               
+umap_metric: "cosine"            
+
+
+enable_pca_preprocess: true      
+pca_preprocess_dims: 50          
+vis_pca_dims: 50               
+
+
+kmeans_n_clusters: 5             
+kmeans_k_min: 2
+kmeans_k_max: 100
+tsne_perplexity: 30
+distance_threshold: 0.5
+
+
+kde_topk: 3              
+kde_bw: 0.35             
+kde_grid_res: 220        
+kde_levels: 12           
+kde_min_points: 30       
+kde_scatter_points: 250  

@@ -1,0 +1,57 @@
+
+
+tag: "hmmtex"
+corpus: "MATH"
+mode: "rag" 
+
+
+
+corpus_dataset_name: "qwedsacf/competition_math" #"HuggingFaceH4/MATH-500"
+corpus_dataset_config: null
+corpus_split: "train"
+
+
+
+
+
+test_dataset_name: "Custom/hmmt_merged" 
+test_dataset_config: null
+test_split: "test" 
+
+visualize_memory: True
+
+
+
+
+field_map:
+  question: "question" 
+  answer: "golden_answers" 
+
+retrieval_method: "bm25"
+
+prompts:
+  sys_msg: |
+    You are a helpful and expert math assistant. Please solve the following problem carefully. Put your final answer within \\boxed{}.
+    Let's think step by step.
+  
+  rag_system: |
+    <|im_start|>system
+    You are a brilliant mathematics competition expert.
+    
+    I have retrieved some similar solved problems to help you. Use the logic from these examples as a reference, but solve the NEW question independently.
+    
+    [RETRIEVED REFERENCES]
+    <references>
+    {reference}
+    </references>
+    
+    [INSTRUCTIONS]
+    1. REASONING: Think step-by-step. Break down the problem logically.
+    2. FORMAT: Use fractions instead of decimals.
+    3. FINAL ANSWER: You MUST put the final result inside \boxed{{}}. Example: \boxed{{42}} or \boxed{{\frac{{1}}{{2}}}}.
+    <|im_end|>
+    <|im_start|>user
+    {question}
+    <|im_end|>
+    <|im_start|>assistant
+    Let's think step by step.

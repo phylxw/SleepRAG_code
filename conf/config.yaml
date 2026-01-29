@@ -1,0 +1,92 @@
+# conf/config.yaml
+defaults:
+  - _self_
+  - experiment:  aimeex # hmmtex math_self sciqa gsm8k_self openr1 aimeex humaneval mbpp
+  - optimizer: ability
+  - cluster: plus
+
+timestamp: "${now:%Y%m%d_%H%M%S}"
+
+paths:
+   root: your_root
+   index: "${paths.root}/index"
+   jsonl: "${paths.root}/outputs/jsonl"
+   json: "${paths.root}/outputs/json"
+   png: "${paths.root}/outputs/png"
+   txt: "${paths.root}/outputs/txt"
+
+
+  corpus_file: "${paths.jsonl}/${experiment.corpus}_corpus.jsonl"
+  index_dir: "${paths.index}/${experiment.corpus}_bm25_index"
+  optimized_memory: "${paths.jsonl}/${experiment.tag}_optimized_memory_topk.jsonl"
+  index_optimized_dir: "${paths.index}/${experiment.tag}_bm25_index"
+
+  stats_file: "${paths.json}/${experiment.tag}_memory_stats.json"
+  stats_optimized_file: "${paths.json}/${experiment.tag}_memory_optimized_stats.json"
+  stats_after_file: "${paths.json}/${experiment.tag}_memory_after_stats.json"
+
+  cluster_output: "${paths.jsonl}/${experiment.tag}_clustered_result.jsonl"
+  cluster_summary: "${paths.jsonl}/${experiment.tag}_cluster_summary.jsonl"
+  cluster_plot: "${paths.png}/${experiment.tag}_cluster_distribution.png"
+  cluster_vis: "${paths.png}/${experiment.tag}_visualization.png"
+
+  freq_file: "${paths.jsonl}/${experiment.tag}_memory_freq.jsonl"
+  freq_after_file: "${paths.jsonl}/${experiment.tag}_memory_after_freq.jsonl"
+
+  result_dir: "${paths.txt}"
+  result_log_file: "${paths.txt}/${experiment.tag}_on_${experiment.corpus}_${model.source}_${parameters.mode}_${timestamp}.txt"
+  vis_image_file: "${paths.png}/${experiment.tag}_on_${experiment.corpus}_dist_${timestamp}.png"
+  rag_cache_dir: "${paths.root}/rag_result_cache"
+
+  textgrad_log: "${paths.txt}/${experiment.tag}_textgrad_optimization_log_${timestamp}.txt"
+  lowfreq_textgrad_log: "${paths.txt}/lowfreq_textgrad_optimization_log_${timestamp}.txt"
+  highfreq_textgrad_log: "${paths.txt}/highfreq_textgrad_optimization_log_${timestamp}.txt"
+
+parameters:
+  is_first: True
+  total_rounds: 2
+  resume_path: null
+  start_index: 0
+  debug_num: null
+
+  max_retries: 3
+
+  total_num: 5000
+  split_corpus_for_val: True
+  split_ratio: 0.7
+  retrieval_topk: 50
+  final_topk: 5
+  mode: "all" # baseline, rag, all
+  bemr_lambda1: 1.0
+  bemr_lambda2: 0.5
+
+  INIT_VAL: 0.5
+
+model:
+  source: "sglang" 
+  optimize: "sglang"
+  hf_name: "Qwen/Qwen3-4B-Instruct-2507"
+  device: "cuda"
+  batch_size: 128
+  max_input_len: 8192
+  max_new_tokens: 8192
+
+  gemini_name: "gemini-2.5-flash"
+
+  # sglang_api_url: "http://127.0.0.1:30000/v1"
+  sglang_model_name: "Qwen/Qwen3-4B-Instruct-2507"
+  
+  # sglang_model_name: "Qwen/Qwen3-30B-A3B-Thinking-2507" 
+  sglang_api_url: "http://127.0.0.1:30002/v1"
+
+  embedding_name: "BAAI/bge-large-en-v1.5"
+
+
+expert_model:
+  source: "qwen" # "sglang" "qwen"
+  name: "qwen-max" #"Qwen/Qwen3-30B-A3B-Thinking-2507"
+  sglang_api_url: "http://127.0.0.1:30002/v1"
+  # sglang_api_url: "http://127.0.0.1:30000/v1"
+  # name: "Qwen/Qwen3-4B-Instruct-2507"
+  max_new_tokens: 8192
+

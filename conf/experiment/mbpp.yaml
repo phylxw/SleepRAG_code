@@ -1,0 +1,74 @@
+
+
+tag: "mbpp"
+corpus: "mbpp" 
+mode: "rag" 
+
+
+
+
+
+
+corpus_dataset_name: "google-research-datasets/mbpp"
+corpus_dataset_config: "sanitized"
+corpus_split: "train" 
+
+
+
+
+
+test_dataset_name: "google-research-datasets/mbpp"
+test_dataset_config: null
+test_split: "test" 
+
+visualize_memory: True
+
+
+
+
+
+
+field_map:
+  question: "text"  
+  answer: "code"    
+
+retrieval_method: "bm25"
+
+
+
+
+prompts:
+  
+  sys_msg: |
+    You are an expert Python programmer. 
+    Complete the function provided in the prompt.
+    
+    IMPORTANT format rules:
+    You MUST enclose your code in a markdown block like this:
+    ```python
+    # Your code here
+    ```
+
+  
+  rag_system: |
+    <|im_start|>system
+    You are an expert Python programmer.
+
+    I have retrieved some similar programming problems and their solutions to help you.
+    Study how they implement logic and handle edge cases, then solve the NEW problem independently.
+
+    [RETRIEVED REFERENCES]
+    <references>
+    {reference}
+    </references>
+
+    [INSTRUCTIONS]
+    CRITICAL: You MUST enclose your code in a markdown block like this:
+    ```python
+    # Your code here
+    ```
+    <|im_end|>
+    <|im_start|>user
+    {question}
+    <|im_end|>
+    <|im_start|>assistant

@@ -1,0 +1,77 @@
+
+
+tag: "gpqa"
+corpus: "MATH"
+
+
+
+
+
+corpus_dataset_name: "DigitalLearningGmbH/MATH-lighteval"
+corpus_dataset_config: "algebra"
+corpus_split: "train"
+
+
+
+
+test_dataset_name: "Idavidrein/gpqa"
+test_dataset_config: "gpqa_diamond" 
+test_split: "train" 
+
+visualize_memory: True
+
+
+
+
+
+field_map:
+  question: "Question"
+  answer: "Correct Answer"
+
+
+
+
+retrieval_method: "bm25"
+
+reward: 2
+punishment: -1
+
+
+
+
+prompts:
+  sys_msg : |
+    You are a math expert. Solve the following multiple-choice question. Solve the following question in a brief.Don't generate overly long reasoning paths.
+    ### Instruction:
+    1. Derive the answer step-by-step.
+    2. Compare your result with options (A) (B) (C) (D).
+    3. IMPORTANT: Output ONLY the option letter inside the box.
+    4. DO NOT output the calculated number.
+
+    Example Format:
+    If the answer is option (A), output: \boxed{{A}}
+
+    ### Answer:
+    Let's think step by step.
+
+  rag_system: |
+    Solve the following multiple-choice question.Solve the following question in a brief.Don't generate overly long reasoning paths.Before ask you,I will provide you with some questions with answers for reference first.
+
+    Reference:
+    {reference}
+
+
+    Example Format:
+    If the answer is option (A), output: \boxed{{A}}
+
+    ### Instruction:
+    1. Derive the answer step-by-step.
+    2. Compare your result with options (A) (B) (C) (D).
+    3. IMPORTANT: Output ONLY the option letter inside the box.
+    4. DO NOT output the calculated number.
+
+    ### Question:
+    {question}
+
+    ### Answer:
+    Let's think step by step.

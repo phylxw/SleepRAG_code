@@ -1,0 +1,244 @@
+# conf/optimizer/prime.yaml
+
+top_k_high: 100
+bottom_k_low: 256
+low_freq_threshold: 1
+top_n_similar: 5
+llm_batch_size: 128
+
+max_memory_len: 8192
+
+prune:
+  enabled: true
+  verbose: true
+  z: 1.64                 # ~90% one-sided
+  min_cluster_size: 2
+  skip_negative_cluster: true
+  min_obs_best: 6
+  best_lcb_thr: 0.70
+  trash_ucb_thr: 0.35
+  max_prune_per_cluster: 3
+prompts:
+
+    # =================================================================
+    # Low Score Memory Expert (Diagnosis)
+    # =================================================================
+    low_grad_expert: |
+      <|im_start|>system
+      You are a TextGrad Gradient Optimizer for memories of a Retrieval-Augmented Generation (RAG) system. Analyze why the [Target Memory] failed to support the [Failed Queries].
+      [GOAL]
+      Your task is to select one of the three actions below, and provide optimized guidance as text gradients. 
+      Focusing on the missing reasoning frameworks or methodologies as much as possible without being overly confined to the questions and answers of the original problem.
+      The action you decide and gradients you generate will be provided to the student model, allowing it to improve the memory according to your guidance.
+      [Target Memory]
+      {content}
+      [Failed Queries]
+      {neg_queries}      
+      [ACTION RULES]
+      Choose ONE action based on the gap analysis:
+      1. EXPAND: This memory itself is already good enough and cannot be deleted. Therefore, we need to organize the new problem-solving methods and logical thinking summarized from the incorrect questions into a new memory to avoid conflicts.
+      2. REPLACE: The memory is misleading or useless. Discard it and create a new memory with new problem-solving methods and logical thinking summarized from the incorrect questions.
+      
+      [OUTPUT INSTRUCTION]
+      If the action is EXPAND, the suggestions should first provide optimization directions for the low-quality memory, then clearly state specific requirements for generating the new memory, with a distinct separation or differentiation between the two parts.
+      If the action is REPLACE, the suggestions should specify concrete requirements for generating the new memory.
+      [OUTPUT FORMAT STRICT]
+      Action: \box{{EXPAND|REPLACE}}
+      Advice: \advice{{<Actionable instructions. MUST include: (i) Abstract principles/logic chains; (ii) Scope definition if EXPAND/REPLACE. Don't generate so long>}}
+      <|im_end|>
+      <|im_start|>user
+      Start your analysis now.You can think step by step and give the final info at last.
+      <|im_end|>
+      <|im_start|>assistant
+     
+
+    # =================================================================
+    # Application: REFINE (Update existing memory)
+    # =================================================================
+    appgrad_low_refine: |
+      <|im_start|>system
+      You are a crucial part responsible for memory optimization in gradient-based memory refinement.
+      Rewrite the memory entry to enhance the model's reasoning ability and generalization capability for problem-solving.
+      
+      [INPUTS]
+      {content}
+      
+      [ADVICE]
+      {gradient}
+      
+      [FORMAT STRICT]
+      Output the memory you finally summarized in the wrapper:
+      \memory$ <New detailed memory content> \endmemory$
+      [INSTRUCTIONS]
+      Summarize a set of appropriate problem-solving logic and thinking skills from these questions with certain commonalities. Meanwhile, combine the gradient provided by experts to analyze the potential capabilities beyond the model's cognition implied therein. 
+      Focus on enhancing the model's reasoning ability after it accepts the new memory, and do not write the original questions and answers into the memory.
+      The memory to be compiled should not be too long or redundant; just condense its capability features. You may conduct in-depth thinking first before presenting the final memory.
+      Constraints: <= 100 tokens. No meta talk (no “this memory improves…”, no “framework/skills/generalization”).
+      <|im_end|>
+      <|im_start|>user
+      Refine the memory now.You can think step by step and give the memory at last.
+      <|im_end|>
+      <|im_start|>assistant
+
+    # =================================================================
+    # Application: REPLACE (New memory from scratch)
+    # =================================================================
+    appgrad_low_replace: |
+      <|im_start|>system
+      You are a crucial part responsible for memory optimization in gradient-based memory refinement.
+      Create a BRAND NEW memory entry to enhance the model's reasoning ability and generalization capability for problem-solving.
+      
+      [INPUTS]
+      {neg_queries}
+      
+      [ADVICE]
+      {gradient}
+      
+      [FORMAT STRICT]
+      Output the memory you finally summarized in the wrapper:
+      \memory$ <New detailed memory content> \endmemory$
+
+      [INSTRUCTIONS]
+      Summarize a set of appropriate problem-solving logic and thinking skills from these questions with certain commonalities. Meanwhile, combine the gradients provided by experts to analyze the potential capabilities beyond the model's cognition implied therein, and compile all these into a new memory. 
+      Focus on enhancing the model's reasoning ability after it accepts the new memory, and do not write the original questions and answers into the memory.
+      The memory to be compiled should not be too long or redundant; just condense its capability features. You may conduct in-depth thinking first before presenting the final memory.
+      If you deem that the model inherently possesses the knowledge contained in this memory, you can make it as concise as possible.
+      Constraints: <= 100 tokens. No meta talk (no “this memory improves…”, no “framework/skills/generalization”).
+      <|im_end|>
+      <|im_start|>user
+      Create the new memory.You can think step by step and give the memory at last.
+      <|im_end|>
+      <|im_start|>assistant
+
+
+  # =================================================================
+  # High Score Memory Expert (Diagnosis)
+  # =================================================================
+    high_grad_expert: |
+      <|im_start|>system
+      You are a Senior Cognitive Architect optimizing a 'Champion' memory (high success rate).
+      
+      [INPUT DATA]
+      <champion_memory>
+      {content}
+      </champion_memory>
+      
+      <failed_queries>
+      {neg_queries}
+      </failed_queries>
+      
+      [TASK]
+      Analyze why this strong memory failed on these specific queries. Determine the strategy:
+      
+      1. IGNORE: Failure is noise/irrelevant.
+      2. SUPPLEMENT: The query needs an exception handling or nuance added to the existing logic.
+      3. SPLIT: The query represents a distinct sub-domain requiring a standalone specialized memory.
+      
+      [OUTPUT FORMAT STRICT]
+      Reasoning: <1-3 sentences on the logical gap>
+      Command: \box{{IGNORE|SUPPLEMENT|SPLIT}} \gradient{{<Specific instructions for the update>}}
+      <|im_end|>
+      <|im_start|>user
+      Analyze the failure.You can think step by step and give the final info at last.
+      <|im_end|>
+      <|im_start|>assistant
+      Let's think step by step.
+
+    # =================================================================
+    # Application: SUPPLEMENT (Add edge case logic)
+    # =================================================================
+    appgrad_high_supplement: |
+      <|im_start|>system
+      You are a crucial part responsible for memory optimization in gradient-based memory refinement.
+      
+      [GOAL]
+      Create a Unified Memory by appending new logic for edge cases to the existing memory.
+      
+      [INPUTS]
+      <existing_memory>
+      {original_content}
+      </existing_memory>
+      
+      <expert_advice>
+      {advice}
+      </expert_advice>
+      
+      [INSTRUCTIONS]
+      Constraints: <= 100 tokens. No meta talk (no “this memory improves…”, no “framework/skills/generalization”).
+      [FORMAT STRICT]
+      Output the memory you finally summarized in the wrapper:
+      \memory$ <New detailed memory content> \endmemory$
+      <|im_end|>
+      <|im_start|>user
+      Merge the memory.You can think step by step and give the memory at last.
+      <|im_end|>
+      <|im_start|>assistant
+
+    # =================================================================
+    # Application: SPLIT (Create specialized memory)
+    # =================================================================
+    appgrad_high_split: |
+      <|im_start|>system
+      You are a crucial part responsible for memory optimization in gradient-based memory expansion.
+      
+      [GOAL]
+      Create a standalone "Specialized Logic" memory for a distinct sub-domain with thr reference of the missed_queries below.
+      There are gaps in the existing memory. Therefore, you need to use the information below to summarize a new set of more universal logic or methods.
+      [INPUTS]
+      <missed_queries>
+      {neg_text}
+      </missed_queries>
+      
+      <expert_advice>
+      {advice}
+      </expert_advice>
+      
+      [INSTRUCTIONS]
+      Constraints: <= 100 tokens. No meta talk (no “this memory improves…”, no “framework/skills/generalization”).
+      
+      [FORMAT STRICT]
+      Output the memory you finally summarized in the wrapper:
+      \memory$ <New detailed memory content> \endmemory$
+      <|im_end|>
+      <|im_start|>user
+      Create a specialized memory.You can think step by step and give the memory at last.
+      <|im_end|>
+      <|im_start|>assistant
+
+    expert_judge: |
+      You are a Cognitive Logic Auditor for a RAG system.
+      Your goal is to reject memories that are mere "fact patches" and accept memories that provide "generalized reasoning frameworks."
+
+      [Failed Queries]
+      {failed}
+
+      [Parent Memory]
+      {old}
+
+      [Candidate New Memory]
+      {new}
+
+      [Audit Criteria]
+      1. **Methodology over Answer**: Does the Candidate Memory explain the *how* and *why* (logic, steps, principles) rather than just giving the answer?
+      2. **Generalization**: Is the logic abstract enough to handle similar future problems, not just the specific failed queries?
+      3. **Atomic & Clear**: Is it a single, self-contained concept? (For SUPPLEMENT/SPLIT, it must be robust).
+      4. **Safety**: No hallucinations or unsure facts.
+
+      [Output Format - STRICT]
+      Verdict: PASS|FAIL
+      Feedback: <If FAIL, explain specifically which logic is missing or if it's too specific to the query. If PASS, write "OK".>
+
+    retry_prompt: |
+      {ori}
+
+      [Previous Attempt]
+      {bad}
+      
+      [Failed Queries]
+      {failed}
+
+      [Critique]
+      {feedback}
+
+      Instruction: Based on the critique, rewrite the memory. optimize for GENERALIZATION.
+      Output ONLY the memory content wrapped in \memory$ <New detailed memory content> \endmemory$.

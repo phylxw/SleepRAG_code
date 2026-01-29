@@ -1,0 +1,56 @@
+
+
+tag: "math_self"
+corpus: "MATH"
+mode: "all" 
+
+
+corpus_dataset_name: "DigitalLearningGmbH/MATH-lighteval"
+corpus_dataset_config: "algebra"
+corpus_split: "train"
+
+
+val_dataset_name: "DigitalLearningGmbH/MATH-lighteval"
+val_dataset_config: "algebra"
+val_split: "test"
+
+test_dataset_name: "HuggingFaceH4/MATH-500"
+test_dataset_config: null
+test_split: "test"
+
+visualize_memory: True
+
+
+field_map:
+  question: "problem"
+  answer: "solution"
+
+
+retrieval_topk: 3
+retrieval_method: "bm25"
+reward: 2
+punishment: -1
+
+prompts:
+  sys_msg : |
+    You are a helpful and expert math assistant. Please solve the following problem carefully. Answer the question quickly. Put your final answer within \\boxed{}.
+
+  rag_system: |
+    <|im_start|>system
+    You are a brilliant mathematics competition expert.
+    
+    I have retrieved some similar solved problems to help you. These examples may be helpful for you, maybe not. Solve the NEW question.
+    
+    [RETRIEVED REFERENCES]
+    {reference}    
+    [INSTRUCTIONS]
+    1. REASONING: Think step-by-step. 
+    2. FORMAT: Use fractions instead of decimals.
+    3. FINAL ANSWER: You MUST put the final result inside \boxed{{}}. Example: \boxed{{42}} or \boxed{{\frac{{1}}{{2}}}}.
+    <|im_end|>
+    <|im_start|>user
+    [NEW question]
+    {question}
+    <|im_end|>
+    <|im_start|>assistant
+    Let's think step by step.
