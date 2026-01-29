@@ -1,0 +1,31 @@
+#python=3.10
+#install at first
+#conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia -y
+#conda install -c pytorch -c nvidia faiss-gpu=1.8.0 -y
+datasets
+base58
+nltk
+numpy
+langid
+openai
+peft
+PyYAML
+rank_bm25
+rouge
+spacy
+tiktoken
+tqdm
+transformers>=4.40.0
+bm25s[core]==0.2.1
+fschat
+streamlit
+chonkie>=1.0.2, <1.1.0
+gradio==5.5.0  # <---  5.5.0，escape bug of 6.0
+rouge-chinese
+jieba
+matplotlib
+termcolor
+umap-learn
+sentence_transformers
+scikit-learn
+google-generativeai
